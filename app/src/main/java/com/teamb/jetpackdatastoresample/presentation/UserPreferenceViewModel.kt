@@ -5,22 +5,34 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.teamb.jetpackdatastoresample.repository.UserPreferencesRepository
+import com.teamb.jetpackdatastoresample.repository.UserDetailPrefDataStoreRepository
+import com.teamb.jetpackdatastoresample.repository.UserDetailProtoDataStoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class UserPreferenceViewModel @Inject constructor(
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserDetailPrefDataStoreRepository,
+    private val userDetailProtoDataStoreRepository: UserDetailProtoDataStoreRepository
 ) : ViewModel() {
     var state by mutableStateOf(UserFormState())
         private set
 
+    private val IS_PROTO = true
+
+
     init {
         viewModelScope.launch {
-            userPreferencesRepository.getUserDetailData().collect { newState ->
-                state = newState
+            if (IS_PROTO) {
+                userDetailProtoDataStoreRepository.getUserFormState.collect {
+                    state = it
+                }
+            } else {
+                userPreferencesRepository.getUserDetailData().collect { newState ->
+                    state = newState
+                }
             }
         }
     }
@@ -47,7 +59,11 @@ class UserPreferenceViewModel @Inject constructor(
 
     private fun saveData() {
         viewModelScope.launch {
-            userPreferencesRepository.updateUserDetail(state)
+            if (IS_PROTO) {
+                userDetailProtoDataStoreRepository.updateUserDetail(state)
+            } else {
+                userPreferencesRepository.updateUserDetail(state)
+            }
         }
     }
 }

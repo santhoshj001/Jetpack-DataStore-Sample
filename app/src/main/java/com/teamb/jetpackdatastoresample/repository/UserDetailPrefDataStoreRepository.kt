@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class UserPreferencesRepository @Inject constructor(
+class UserDetailPrefDataStoreRepository @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) {
     suspend fun updateUserDetail(state: UserFormState) {
